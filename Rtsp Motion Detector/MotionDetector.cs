@@ -46,8 +46,6 @@ namespace Rtsp_Motion_Detector
                 frameDelta = new(), thresh = new();
                 VectorOfVectorOfPoint cnts = new();
                 Size kSize = new(21, 21);
-                //string defaultMjpgUrl = "http://158.58.130.148/mjpg/video.mjpg";
-                //string defaultRtspUrl = "rtsp://admin:admin123@user10.ddns.net/user=admin&password=admin123&channel=16&stream=0.sdp";
                 int framesCount = 0;
                 bool motionDetected = false;
 
@@ -90,7 +88,7 @@ namespace Rtsp_Motion_Detector
 
                     for (int i = 0; i < cnts.Size; i++)
                     {
-                        if (CvInvoke.ContourArea(cnts[i]) < sensitivity * 100)
+                        if (CvInvoke.ContourArea(cnts[i]) < (sensitivity * 100))
                         {
                             continue;
                         }

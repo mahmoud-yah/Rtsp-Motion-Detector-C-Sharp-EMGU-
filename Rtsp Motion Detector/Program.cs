@@ -13,7 +13,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        MotionDetector motionDetector = new(streamUrl: "http://158.58.130.148/mjpg/video.mjpg", senitivity: 10);
+        MotionDetector motionDetector = new(streamUrl: "http://158.58.130.148/mjpg/video.mjpg", senitivity: 5);
         motionDetector.Start(showCamera:true);
     }
 }
