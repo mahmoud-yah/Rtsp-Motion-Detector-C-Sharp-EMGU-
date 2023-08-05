@@ -85,6 +85,7 @@ namespace Rtsp_Motion_Detector
                         if (CvInvoke.ContourArea(cnts[i]) < (Sensitivity * 100))
                             continue;
                         motionDetected = true;
+                        break;
                     }
 
                     if (motionDetected)
