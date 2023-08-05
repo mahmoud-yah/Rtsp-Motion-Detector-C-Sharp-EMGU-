@@ -1,22 +1,17 @@
-﻿using Emgu.CV.CvEnum;
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
-using Emgu.CV;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Emgu.CV.Structure;
 
 namespace Rtsp_Motion_Detector
 {
     internal class MotionDetector
     {
-        readonly String streamUrl;
+        readonly string streamUrl;
         readonly int sensitivity;
         bool isDetecting = false;
         Thread? detectorThread;
+
         public MotionDetector(string streamUrl, int senitivity)
         {
             this.streamUrl = streamUrl;
@@ -118,7 +113,6 @@ namespace Rtsp_Motion_Detector
             isDetecting = false;
 
         }
-
        
     }
 }
