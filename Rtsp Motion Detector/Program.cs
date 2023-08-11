@@ -20,7 +20,7 @@ internal class Program
         Console.ReadKey();
 
         // Stop motion detection when a key is pressed
-        motionDetector.Stop();
+        motionDetector.StopAsync().Wait();
     }
 
     // Event handler for MotionDetected event

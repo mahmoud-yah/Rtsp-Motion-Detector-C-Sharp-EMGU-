@@ -12,21 +12,20 @@ namespace Rtsp_Motion_Detector
         public bool IsDetecting { get; private set; } = false;
         public event EventHandler? MotionDetected;
 
-        private Thread? detectorThread;
+        private Task? detectorTask;
 
-        public MotionDetector(string streamUrl, int senitivity = 5)
+        public MotionDetector(string streamUrl, int sensitivity = 5)
         {
             StreamUrl = streamUrl;
-            Sensitivity = Math.Max(5, Math.Min(10, senitivity));
+            Sensitivity = Math.Max(5, Math.Min(10, sensitivity));
         }
 
         public void Start(bool showCamera = false)
         {
-            detectorThread = new Thread(() => StartDetector(showCamera: showCamera)) { IsBackground = true };
-            detectorThread.Start();
+            detectorTask = Task.Run(() => StartDetector(showCamera: showCamera));
         }
 
-        private void StartDetector(bool showCamera = false)
+        private async Task StartDetector(bool showCamera = false)
         {
             IsDetecting = true;
 
@@ -100,7 +99,7 @@ namespace Rtsp_Motion_Detector
                         CvInvoke.Imshow("Camera", frame);
                     }
 
-                    if (CvInvoke.WaitKey(1) == 27) 
+                    if (CvInvoke.WaitKey(1) == 27)
                         break;
                 }
             }
@@ -113,6 +112,11 @@ namespace Rtsp_Motion_Detector
             MotionDetected?.Invoke(this, e);
         }
 
-        public void Stop() => IsDetecting = false;
+        public async Task StopAsync()
+        {
+            IsDetecting = false;
+            if (detectorTask != null)
+                await detectorTask;
+        }
     }
 }
