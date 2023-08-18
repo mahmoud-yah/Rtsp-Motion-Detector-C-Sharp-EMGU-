@@ -45,6 +45,10 @@ namespace Rtsp_Motion_Detector
                 //passing 0 uses the local webcam instead of a network stream
                 VideoCapture capture = new(StreamUrl);
 
+                //set video size to 512x288 to process faster
+                capture.Set(CapProp.FrameWidth, 512);
+                capture.Set(CapProp.FrameHeight, 288);
+
                 //initializing the first frame
                 capture.Read(frame);
 
