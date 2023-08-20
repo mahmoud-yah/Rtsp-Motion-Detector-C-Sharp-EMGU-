@@ -8,15 +8,15 @@ internal class Program
         string rtspStreamUrl = "http://158.58.130.148/mjpg/video.mjpg";
 
         // Create a new instance of MotionDetector
-        MotionDetector motionDetector = new(rtspStreamUrl);
+        MotionDetector motionDetector = new(rtspStreamUrl,senitivity: 1);
 
         // Subscribe to the MotionDetected event
         motionDetector.MotionDetected += MotionDetector_MotionDetected;
 
         // Start motion detection
-        motionDetector.Start(showCamera: true);
+        motionDetector.Start(showCamera: false);
 
-        Console.WriteLine("Motion detection started. Press any key to stop...");
+        Console.WriteLine($"Motion detection started.\nListening on: {rtspStreamUrl} \nPress any key to stop...");
         Console.ReadKey();
 
         // Stop motion detection when a key is pressed

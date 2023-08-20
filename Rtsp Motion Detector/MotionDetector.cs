@@ -1,12 +1,14 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 
 namespace Rtsp_Motion_Detector
 {
     internal class MotionDetector
     {
+        
         public readonly string StreamUrl;
         public readonly int Sensitivity;
         public bool IsDetecting { get; private set; } = false;
@@ -17,7 +19,14 @@ namespace Rtsp_Motion_Detector
         public MotionDetector(string streamUrl, int senitivity = 5)
         {
             StreamUrl = streamUrl;
-            Sensitivity = Math.Max(5, Math.Min(10, senitivity));
+            if (senitivity <= 0 || senitivity > 10)
+            {
+                Sensitivity = 5;
+            }
+            else
+            {
+                Sensitivity = senitivity;
+            }
         }
 
         public void Start(bool showCamera = false)
@@ -52,21 +61,27 @@ namespace Rtsp_Motion_Detector
                 //initializing the first frame
                 capture.Read(frame);
 
+                //resizing frames to lower the resources
+                CvInvoke.Resize(frame, frame, new Size(), 0.5, 0.5);
+                
+
                 //convert the frame to grayscale
                 CvInvoke.CvtColor(frame, staticFrame, ColorConversion.Bgr2Gray);
                 CvInvoke.GaussianBlur(staticFrame, staticFrame, kSize, 0);
 
                 while (capture.Read(frame))
                 {
+                    //resizing frames to lower the resources
+                    CvInvoke.Resize(frame, frame, new Size(), 0.5, 0.5);
+
                     //checking if the detector is still running
                     if (!IsDetecting)
                         break;
 
-                    framesCount++;
-
                     //convert the frame to grayscale
                     CvInvoke.CvtColor(frame, gray, ColorConversion.Bgr2Gray);
                     CvInvoke.GaussianBlur(gray, gray, kSize, 0);
+
 
                     if (framesCount == 10)
                     {
@@ -100,9 +115,11 @@ namespace Rtsp_Motion_Detector
                     }
                     if (showCamera)
                     {
-                        CvInvoke.NamedWindow("Camera", WindowFlags.KeepRatio);
+                        //CvInvoke.NamedWindow("Camera"+counter.ToString(), WindowFlags.KeepRatio);
                         CvInvoke.Imshow("Camera", frame);
                     }
+
+                    framesCount++;
 
                     if (CvInvoke.WaitKey(1) == 27) 
                         break;
