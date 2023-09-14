@@ -4,9 +4,7 @@ internal class Program
 {
     public static void Main()
     {
-        // Replace "YOUR_RTSP_STREAM_URL" with the actual RTSP stream URL you want to monitor
-        //string rtspStreamUrl = "http://158.58.130.148/mjpg/video.mjpg";
-        List<String> streamLinks = new List<String>() {
+        List<string> streamLinks = new() {
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c1/s1/live",
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c2/s1/live",
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c3/s1/live",
@@ -64,35 +62,20 @@ internal class Program
         };
         List<MotionDetector> detectors = new();
 
-        // Create a new instance of MotionDetector
-        //MotionDetector motionDetector = new(streamLinks[0],senitivity: 1);
-
         for (int i = 0; i < streamLinks.Count; i++)
         {
-            MotionDetector tempReference = new MotionDetector(streamLinks[i], senitivity: 1);
-            tempReference.Start(showCamera:true);
+            MotionDetector tempReference = new(streamLinks[i], senitivity: 1, showCamera: false);
+            tempReference.Start();
             detectors.Add(tempReference);
         }
 
-        // Subscribe to the MotionDetected event
-        //motionDetector.MotionDetected += MotionDetector_MotionDetected;
+        while(true)
+        {
+            Task.Delay(1000).Wait();
+            Console.WriteLine($"Running now : {detectors.Count(c => c.IsDetecting == true)} cameras");
+        }
 
-        // Start motion detection
-        //motionDetector.Start(showCamera: true);
-
-        //Console.WriteLine($"Motion detection started.\nListening on: {rtspStreamUrl} \nPress any key to stop...");
         Console.WriteLine($"Motion detection started.\nPress any key to stop...");
         Console.ReadKey();
-
-        // Stop motion detection when a key is pressed
-        //motionDetector.Stop();
-    }
-
-    // Event handler for MotionDetected event
-    private static void MotionDetector_MotionDetected(object? sender, EventArgs e)
-    {
-        Console.WriteLine("Motion detected!");
-        // You can add any custom action you want to perform when motion is detected.
-        // For example, you can send a notification, save the video clip, etc.
     }
 }

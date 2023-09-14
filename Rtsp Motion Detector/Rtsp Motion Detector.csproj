@@ -6,11 +6,12 @@
     <RootNamespace>Rtsp_Motion_Detector</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.7.0.5276" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.7.0.5276" />
+    <PackageReference Include="Emgu.CV" Version="4.8.0.5324" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.0.5324" />
   </ItemGroup>
 
 </Project>
