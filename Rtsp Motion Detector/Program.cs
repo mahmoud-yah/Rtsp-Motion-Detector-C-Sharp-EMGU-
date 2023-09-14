@@ -4,7 +4,8 @@ internal class Program
 {
     public static void Main()
     {
-        List<string> streamLinks = new() {
+        var streamLinks = new List<string>() {
+            "http://158.58.130.148/mjpg/video.mjpg",
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c1/s1/live",
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c2/s1/live",
             "rtsp://admin:isourse@12345@115.241.133.98:554/unicast/c3/s1/live",
@@ -69,7 +70,7 @@ internal class Program
             detectors.Add(tempReference);
         }
 
-        while(true)
+        while (true)
         {
             Task.Delay(1000).Wait();
             Console.WriteLine($"Running now : {detectors.Count(c => c.IsDetecting == true)} cameras");

@@ -17,6 +17,7 @@ internal class MotionDetector
     public readonly string StreamUrl;
     public readonly int Sensitivity;
 
+    public bool KeepDetecting { get; private set; } = true;
     public bool IsDetecting { get; private set; } = false;
     public static bool ResizeSource { get; set; } = true;
     public static bool ResizeFrames { get; set; } = true;
@@ -37,14 +38,16 @@ internal class MotionDetector
     {
         Task.Run(() =>
         {
+            int failTimeOut = 1;
             try
             {
                 StartDetector();
             }
             catch (Exception ex)
             {
+                IsDetecting = false;
                 Console.WriteLine("...Error... " + ex.Message);
-                if (ex is TimeoutException)
+                if (ex is TimeoutException || --failTimeOut == 0)
                     return;
                 Console.WriteLine("Restarting detector..");
                 StartDetector();
@@ -54,7 +57,6 @@ internal class MotionDetector
 
     private void StartDetector()
     {
-        IsDetecting = true;
         int framesCount = 0;
 
         var frame = new Mat();
@@ -65,7 +67,7 @@ internal class MotionDetector
         var vectorOfVectorOfPoint = new VectorOfVectorOfPoint();
 
         //passing 0 uses the local webcam instead of a network stream
-        var capture = new VideoCapture(StreamUrl);
+        using var capture = new VideoCapture(StreamUrl);
 
         // Wait for the new source to open (you can set a timeout if needed)
         if (!WaitSourceToOpen(capture))
@@ -87,7 +89,6 @@ internal class MotionDetector
         //resizing frames to optimize the performance
         CvInvoke.Resize(frame, frame, new Size(), 0.5, 0.5);
 
-
         //convert the frame to grayscale
         CvInvoke.CvtColor(frame, staticFrame, ColorConversion.Bgr2Gray);
         CvInvoke.GaussianBlur(staticFrame, staticFrame, GaussianKernalSize, 0);
@@ -95,8 +96,10 @@ internal class MotionDetector
         while (capture.Read(frame))
         {
             //checking if the detector is still running
-            if (!IsDetecting)
+            if (!KeepDetecting)
                 break;
+
+            IsDetecting = true;
 
             //resizing frames to lower the resources
             if (ResizeFrames)
@@ -132,7 +135,7 @@ internal class MotionDetector
             framesCount++;
 
             if (showCamera)
-                CvInvoke.Imshow("Camera " + cameraID.ToString(), frame);
+                CvInvoke.Imshow($"Camera {cameraID}", frame);
 
             if (CvInvoke.WaitKey(1) == 27)
                 break;
@@ -157,9 +160,9 @@ internal class MotionDetector
     // Helper method to raise the MotionDetected event
     private void OnMotionDetected(EventArgs e)
     {
-        Debug.WriteLine("Motion Detected from camera" + cameraID.ToString());
+        Debug.WriteLine($"Motion Detected from camera #{cameraID}");
         MotionDetected?.Invoke(this, e);
     }
 
-    public void Stop() => IsDetecting = false;
+    public void Stop() => KeepDetecting = false;
 }
