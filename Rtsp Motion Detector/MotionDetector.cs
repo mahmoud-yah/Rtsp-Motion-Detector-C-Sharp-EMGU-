@@ -1,7 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
-using System.Diagnostics;
 using System.Drawing;
 
 namespace Rtsp_Motion_Detector;
@@ -23,7 +22,7 @@ internal class MotionDetector
     public static bool ResizeFrames { get; set; } = true;
     public static int FrameLimit { get; set; } = 20;
     public static TimeSpan MaxWaitTime { get; set; } = TimeSpan.FromSeconds(10);
-    public event EventHandler? MotionDetected;
+    public event EventHandler<MotionDetector>? MotionDetected;
 
     public MotionDetector(string streamUrl, int senitivity = 5, bool showCamera = true)
     {
@@ -128,7 +127,7 @@ internal class MotionDetector
                     continue;
                 //motionDetected
                 // Raise the motion detected event
-                OnMotionDetected(EventArgs.Empty);
+                OnMotionDetected(this);
                 break;
             }
 
@@ -158,9 +157,9 @@ internal class MotionDetector
     }
 
     // Helper method to raise the MotionDetected event
-    private void OnMotionDetected(EventArgs e)
+    private void OnMotionDetected(MotionDetector e)
     {
-        Debug.WriteLine($"Motion Detected from camera #{cameraID}");
+        Console.WriteLine($"Motion Detected from camera #{cameraID}");
         MotionDetected?.Invoke(this, e);
     }
 
