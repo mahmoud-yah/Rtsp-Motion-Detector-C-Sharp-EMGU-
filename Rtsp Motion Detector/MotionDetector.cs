@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System.Drawing;
 
@@ -15,6 +16,7 @@ internal class MotionDetector
     public readonly bool showCamera;
     public readonly string StreamUrl;
     public readonly int Sensitivity;
+    public readonly DetectionCoordinates Coordinates;
 
     public bool KeepDetecting { get; private set; } = true;
     public bool IsDetecting { get; private set; } = false;
@@ -24,13 +26,14 @@ internal class MotionDetector
     public static TimeSpan MaxWaitTime { get; set; } = TimeSpan.FromSeconds(10);
     public event EventHandler<MotionDetector>? MotionDetected;
 
-    public MotionDetector(string streamUrl, int senitivity = 5, bool showCamera = true)
+    public MotionDetector(string streamUrl, DetectionCoordinates coordinates, int senitivity = 5, bool showCamera = true)
     {
         counter++;
         cameraID = counter;
         this.showCamera = showCamera;
         StreamUrl = streamUrl;
         Sensitivity = senitivity <= 0 || senitivity > 10 ? 5 : senitivity;
+        Coordinates = coordinates;
     }
 
     public void Start()
@@ -63,7 +66,11 @@ internal class MotionDetector
         var staticFrame = new Mat();
         var frameDelta = new Mat();
         var thresh = new Mat();
+        var croppedFrame=new Mat();
         var vectorOfVectorOfPoint = new VectorOfVectorOfPoint();
+        var rect = new Rectangle((int)Coordinates.X,(int)Coordinates.Y,(int)Coordinates.Width,(int)Coordinates.Height);
+        var rectangleColor = new MCvScalar(0, 0, 255);
+        
 
         //passing 0 uses the local webcam instead of a network stream
         using var capture = new VideoCapture(StreamUrl);
@@ -88,8 +95,10 @@ internal class MotionDetector
         //resizing frames to optimize the performance
         CvInvoke.Resize(frame, frame, new Size(), 0.5, 0.5);
 
+        croppedFrame = new Mat(frame, rect);
+
         //convert the frame to grayscale
-        CvInvoke.CvtColor(frame, staticFrame, ColorConversion.Bgr2Gray);
+        CvInvoke.CvtColor(croppedFrame, staticFrame, ColorConversion.Bgr2Gray);
         CvInvoke.GaussianBlur(staticFrame, staticFrame, GaussianKernalSize, 0);
 
         while (capture.Read(frame))
@@ -104,14 +113,21 @@ internal class MotionDetector
             if (ResizeFrames)
                 CvInvoke.Resize(frame, frame, new Size(), 0.5, 0.5);
 
+            //croping the area of interest from the original frame
+            croppedFrame = new Mat(frame, rect);
+
+            //drawing the red rectangle on the original frame around the area of interest  
+            CvInvoke.Rectangle(frame, rect, rectangleColor,2);
+            
+
             //convert the frame to grayscale
-            CvInvoke.CvtColor(frame, gray, ColorConversion.Bgr2Gray);
+            CvInvoke.CvtColor(croppedFrame, gray, ColorConversion.Bgr2Gray);
             CvInvoke.GaussianBlur(gray, gray, GaussianKernalSize, 0);
 
             if (framesCount == 10)
             {
                 //reinitializing the static frame every 10 frames
-                CvInvoke.CvtColor(frame, staticFrame, ColorConversion.Bgr2Gray);
+                CvInvoke.CvtColor(croppedFrame, staticFrame, ColorConversion.Bgr2Gray);
                 CvInvoke.GaussianBlur(staticFrame, staticFrame, GaussianKernalSize, 0);
                 framesCount = 0;
             }
